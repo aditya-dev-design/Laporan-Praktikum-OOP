@@ -58,6 +58,4 @@ Dokumen ini berisi rangkuman hasil analisis dari setiap tugas praktikum yang tel
 * **Kesimpulan:** Nama method harus seragam agar objek yang berbeda jenis bisa diperlakukan dengan cara yang sama (Interface konsisten).
 
 ---
-<div align="center">
-  <i>Laporan Analisis Selesai</i>
-</div>
+
