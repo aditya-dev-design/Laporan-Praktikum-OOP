@@ -1,0 +1,128 @@
+from abc import ABC, abstractmethod
+
+# 1. ABSTRACTION (Kerangka Dasar)
+class BarangElektronik(ABC):
+    def __init__(self, nama, stok, harga_dasar):
+        self.nama = nama
+        self.__stok = stok 
+        self.__harga_dasar = harga_dasar
+
+    # Getter untuk mengambil nilai stok
+    def get_stok(self):
+        return self.__stok
+
+    # Getter untuk harga dasar 
+    def get_harga_dasar(self):
+        return self.__harga_dasar
+
+    # Setter untuk menambah stok
+    def tambah_stok(self, jumlah):
+        if jumlah < 0:
+            print(f"Gagal update stok {self.nama}! Stok tidak boleh negatif ({jumlah}).")
+        else:
+            self.__stok += jumlah
+            print(f"Berhasil menambahkan stok {self.nama}: {jumlah} unit.")
+
+    @abstractmethod
+    def tampilkan_detail(self):
+        pass
+
+    @abstractmethod
+    def hitung_harga_total(self, jumlah):
+        pass
+
+# 2. Class Anak 1
+class Laptop(BarangElektronik):
+    def __init__(self, nama, stok, harga_dasar, processor):
+        super().__init__(nama, stok, harga_dasar)
+        self.processor = processor
+
+
+    def hitung_harga_total(self, jumlah):
+        # Pajak Laptop 10%
+        harga_dasar = self.get_harga_dasar()
+        pajak = harga_dasar * 0.10
+        total = (harga_dasar + pajak) * jumlah
+        return total, pajak
+
+    def tampilkan_detail(self):
+        return f"[LAPTOP] {self.nama} | Proc: {self.processor}"
+
+# Class Anak 2
+class Smartphone(BarangElektronik):
+    def __init__(self, nama, stok, harga_dasar, kamera):
+        super().__init__(nama, stok, harga_dasar)
+        self.kamera = kamera
+
+
+    def hitung_harga_total(self, jumlah):
+        # Pajak Smartphone 5%
+        harga_dasar = self.get_harga_dasar()
+        pajak = harga_dasar * 0.05
+        total = (harga_dasar + pajak) * jumlah
+        return total, pajak
+
+    def tampilkan_detail(self):
+        return f"[SMARTPHONE] {self.nama} | Cam: {self.kamera}"
+
+
+# FITUR KERANJANG BELANJA
+def format_rupiah(angka):
+    return f"Rp {int(angka):,}".replace(",", ".")
+
+def proses_transaksi(daftar_belanja):
+    print("--- STRUK TRANSAKSI ---")
+    grand_total = 0
+    nomor = 1
+
+    for item in daftar_belanja:
+        objek_barang = item['barang']
+        jumlah_beli = item['jumlah']
+
+        # Validasi stok sebelum beli
+        if jumlah_beli > objek_barang.get_stok():
+            print(f"Stok {objek_barang.nama} tidak cukup!")
+            continue
+
+        # Memanggil method yang sama, tapi perilaku beda tergantung Laptop/HP
+        subtotal, pajak_per_unit = objek_barang.hitung_harga_total(jumlah_beli)
+        info_barang = objek_barang.tampilkan_detail()
+        
+        harga_dasar = objek_barang.get_harga_dasar()
+        persen_pajak = "10%" if isinstance(objek_barang, Laptop) else "5%"
+
+        # Menampilkan Output sesuai format
+        print(f"{nomor}. {info_barang}")
+        print(f"   Harga Dasar: {format_rupiah(harga_dasar)} | Pajak({persen_pajak}): {format_rupiah(pajak_per_unit)}")
+        print(f"   Beli: {jumlah_beli} unit | Subtotal: {format_rupiah(subtotal)}")
+        
+        grand_total += subtotal
+        nomor += 1
+
+    print("-" * 40)
+    print(f"TOTAL TAGIHAN: {format_rupiah(grand_total)}")
+    print("-" * 40)
+
+# Skenario User Story
+if __name__ == "__main__":
+    print("--- SETUP DATA ---")
+    
+    #data produk
+    laptop_rog = Laptop("ROG Zephyrus", 0, 20000000, "Ryzen 9")
+    hp_iphone = Smartphone("iPhone 13", 0, 15000000, "12MP")
+
+    #Skenario Validasi
+    laptop_rog.tambah_stok(10)      # Berhasil
+    hp_iphone.tambah_stok(-5)       # Gagal
+    hp_iphone.tambah_stok(20)       # Berhasil
+
+    # User membeli barang
+    # buat list dictionary agar bisa menampung Objek dan Jumlah yang dibeli
+    keranjang_belanja = [
+        {"barang": laptop_rog, "jumlah": 2},
+        {"barang": hp_iphone, "jumlah": 1}
+    ]
+
+    # Proses Transaksi
+    print() # Enter baris
+    proses_transaksi(keranjang_belanja)
